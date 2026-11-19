@@ -1,0 +1,8 @@
+# 编译输出（.o/.bin/.hex/map 等构建产物）
+projects/*/Output/
+
+# 临时文件
+*.tmp
+*.log
+*.bak
+*.swp
