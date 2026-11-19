@@ -25,14 +25,14 @@ static const compo_listbox_item_t tbl_menu_navigation_list[] = {
     {STR_NAV_ZOOM},
     {STR_NAV_FADE},
     {STR_NAV_SHIFT},
-#if GUI_USE_SCREENSHOOT
+#if GUI_USE_SWITCH3D && GUI_USE_SCREENSHOOT
     {STR_NAV_FLIP},
     {STR_NAV_PLATE_FLIP},
     {STR_NAV_CUBE},
     {STR_NAV_ICUBE},
     {STR_NAV_ROTA},
     {STR_NAV_FOLD},
-#endif // GUI_USE_SCREENSHOOT
+#endif // GUI_USE_SWITCH3D
     {STR_NAV_DRIFT},
     {STR_NAV_NONE},
 };

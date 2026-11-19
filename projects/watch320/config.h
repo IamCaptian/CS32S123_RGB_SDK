@@ -49,7 +49,7 @@
 #define VUSB4S_RESET_EN                 0                           //VUSB4s硬件复位使能
 
 #define CHIP_PACKAGE_SELECT             CHIP_CS32S123BAS               //芯片封装选择 CS32S123
-#define CHIP_PACKAGE_SUPPORT_PSRAM      0                           //芯片支持psram
+#define CHIP_PACKAGE_SUPPORT_PSRAM      1                           //调试: 打开截图/模糊等PSRAM功能(PSRAM推屏GUI_SPU_PSRAM仍为0)
 #define CHIP_PACKAGE_SUPPORT_HFP        1                           //芯片支持HFP
 
 #define UART0_PRINTF_SEL                PRINTF_PB3                  //选择UART打印信息输出IO，或关闭打印信息输出
@@ -109,7 +109,7 @@
  * Module    : NOC配置
  *****************************************************************************/
 #define NOC_FLASH_EN                    0                       //是否支持NOC FLASH(CACHE)
-#define NOC_PSRAM_EN                    0*CHIP_PACKAGE_SUPPORT_PSRAM                       //是否支持NOC FLASH(NO CACHE)
+#define NOC_PSRAM_EN                    1                       //调试: 打开PSRAM控制器(推屏GUI_SPU_PSRAM仍为0)
 #define NOC_PSRAM_SIZE                  FSIZE_4M                //PSRAM的大小
 
 /*****************************************************************************
@@ -187,6 +187,7 @@
 #define GUI_FONT_H_SPACE                0                       //全局字的行间距,0:不设置, 其他:设置文本行最小间距
 #define GUI_USE_ARC                     1                       //是否使用圆弧控件
 #define GUI_USE_SCREENSHOOT             1*CHIP_PACKAGE_SUPPORT_PSRAM //是否使用截图转场, 需要使用psram
+#define GUI_USE_SWITCH3D                0                       //是否使用3D转场动画(需要截图), 0:屏蔽3D转场(代码保留)
 #define GUI_USE_BLUR                    1*CHIP_PACKAGE_SUPPORT_PSRAM //是否使用高斯模糊, 需要使用psram,开启后下拉界面使用高斯模糊效果
 #define GUI_SPU_PSRAM                   0                       //使用PSRAM推屏
 #define DEFAULE_START_FUNC              FUNC_CLOCK              //默认开始任务

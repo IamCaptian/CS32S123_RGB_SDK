@@ -68,6 +68,10 @@ int main(void)
 {
     u32 rst_reason, rtccon10;
 
+    //调试: 提前把UART0映射到PB3, 保证bsp_io_init之前的打印也能看到
+    uart0_mapping_sel();
+    printf("[DBG] main enter\n");
+
     rst_reason = LVDCON;
     rtccon10 = RTCCON10;
     printf("Hello CS32S123: %08x, CPUID: %d\n", rst_reason, CPUID);

@@ -36,12 +36,12 @@ static u8 avi_frame_buff[AVI_FRAME_LEN] AT(.video_play_buf.buf);
 static u8 video_play_disp_buff[VIDEO_PLAY_DISP_WID_MAX * VIDEO_PLAY_DISP_HEI_MAX * 2 + 8] AT(.psram_video_play_disp.buf);
 #endif // PSRAM_SIZE
 
-static u8 avi_jpeg_fifo_buff[AVI_JPEG_FIFO_LEN] AT(.avi_play_fifo.buff);    //AT(.psram_video_play_disp.buf);//·Åspram½âÂë»áÂıÒ»Ğ©, ĞèÒªpsram_switch_cache×ª»»Ò»ÏÂ
+static u8 avi_jpeg_fifo_buff[AVI_JPEG_FIFO_LEN] AT(.avi_play_fifo.buff);    //AT(.psram_video_play_disp.buf);//æ”¾spramè§£ç ä¼šæ…¢ä¸€äº›, éœ€è¦psram_switch_cacheè½¬æ¢ä¸€ä¸‹
 static bool avi_is_init;
 
 
 /*
- *Èç¹ûÆôÓÃ¼ÓÃÜ£¬µ×²ã»Øµ÷Õâ¸öº¯Êı»ñÈ¡KEY
+ *å¦‚æœå¯ç”¨åŠ å¯†ï¼Œåº•å±‚å›è°ƒè¿™ä¸ªå‡½æ•°è·å–KEY
  */
 u32 video_play_key_get(void)
 {
@@ -49,7 +49,7 @@ u32 video_play_key_get(void)
 }
 
 /*
- * ÒÔÏÂº¯Êı¹©¿âµ÷ÓÃ
+ * ä»¥ä¸‹å‡½æ•°ä¾›åº“è°ƒç”¨
  */
 u8 avi_file_read(u8 *buf, u32 btr)
 {
@@ -142,7 +142,12 @@ void *avi_realloc(void *ptr, u32 new_size)
     return ab_realloc(ptr, new_size);
 }
 
+#if PSRAM_SIZE
+//æœ‰PSRAMæ—¶æ”¾åˆ°PSRAM, å¦åˆ™360*360*2(253KB)ä¼šæŠŠSRAMçš„bssæ’‘çˆ†(è¶…è¿‡camera heapèµ·å§‹åœ°å€)
+u8 disp_buf[VIDEO_PLAY_DISP_WID_MAX*VIDEO_PLAY_DISP_HEI_MAX*2] AT(.psram_buf.disp);
+#else
 u8 disp_buf[VIDEO_PLAY_DISP_WID_MAX*VIDEO_PLAY_DISP_HEI_MAX*2];
+#endif
 
 /**
  * video play init
@@ -207,7 +212,7 @@ void bsp_video_play_init(u32 res_addr)
     sys_clk_req(INDEX_VIDEO, VIDEO_CLK_SEL);
     avi_is_init = true;
 
-    //À¶ÑÀÒôÀÖÕıÔÚ²¥·Å
+    //è“ç‰™éŸ³ä¹æ­£åœ¨æ’­æ”¾
     if (bsp_bt_disp_status() <= BT_STA_CONNECTED) {
         bsp_sys_mute();
     }
@@ -323,7 +328,7 @@ void bsp_video_stop(void)
 
 
 /*
- *avi²¥·Å¹ı³ÌÖĞ£¬²¥·Å×ÊÔ´ÇøµÄÒôÆµ,´ò¶ÏÊÓÆµ²¥·Å
+ *aviæ’­æ”¾è¿‡ç¨‹ä¸­ï¼Œæ’­æ”¾èµ„æºåŒºçš„éŸ³é¢‘,æ‰“æ–­è§†é¢‘æ’­æ”¾
  */
 void bsp_video_mp3_res_play(u32 addr, u32 len)
 {

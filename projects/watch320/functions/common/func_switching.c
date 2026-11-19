@@ -52,15 +52,15 @@
 #define SWITCHING_UD_BLUR_MAX_LEVEL		32
 
 static const func_switching_mode_t tbl_switching_mode[] = {
-#if GUI_USE_SCREENSHOOT
+#if GUI_USE_SWITCH3D && GUI_USE_SCREENSHOOT
     {FUNC_SWITCH3D_LR_RIGHT,     		FUNC_SWITCH3D_LR_LEFT    		},           //ZOOM
 #else
     {FUNC_SWITCH_LR_ZOOM_RIGHT,     		FUNC_SWITCH_LR_ZOOM_LEFT    		},           //ZOOM
-#endif // GUI_USE_SCREENSHOOT
+#endif // GUI_USE_SWITCH3D
 
     {FUNC_SWITCH_FADE_OUT,              FUNC_SWITCH_FADE_OUT            },           //FADE
     {FUNC_SWITCH_LR_RIGHT,              FUNC_SWITCH_LR_LEFT             },           //SHIFT
-#if GUI_USE_SCREENSHOOT
+#if GUI_USE_SWITCH3D && GUI_USE_SCREENSHOOT
     {FUNC_SWITCH3D_LR_FLIP_RIGHT,       FUNC_SWITCH3D_LR_FLIP_LEFT      },           //FLIP
     {FUNC_SWITCH3D_LR_PLATE_FLIP_RIGHT, FUNC_SWITCH3D_LR_PLATE_FLIP_LEFT},           //PLATE FLIP
     {FUNC_SWITCH3D_LR_RIGHT,            FUNC_SWITCH3D_LR_LEFT           },           //CUBE
@@ -68,14 +68,20 @@ static const func_switching_mode_t tbl_switching_mode[] = {
     {FUNC_SWITCH3D_LR_ROTA_RIGHT,       FUNC_SWITCH3D_LR_ROTA_LEFT      },           //ROTA
     {FUNC_SWITCH3D_LR_FOLD_RIGHT,       FUNC_SWITCH3D_LR_FOLD_LEFT      },           //FOLD
     {FUNC_SWITCH3D_LR_DRIFT_RIGHT,      FUNC_SWITCH3D_LR_DRIFT_LEFT     },
-#endif // GUI_USE_SCREENSHOOT
+#else
+    {FUNC_SWITCH_DIRECT,                FUNC_SWITCH_DIRECT              },           //DRIFT(3D转场关闭时直接切换)
+#endif // GUI_USE_SWITCH3D
     {FUNC_SWITCH_DIRECT,                FUNC_SWITCH_DIRECT              },           //NONE(DIRECT)
 };
 
-
+#define TBL_SWITCHING_MODE_CNT          ((u8)(sizeof(tbl_switching_mode) / sizeof(tbl_switching_mode[0])))
 
 u8 func_get_switching_mode_byidx(u8 idx, bool flag_next)
 {
+    if (idx >= TBL_SWITCHING_MODE_CNT) {        //越界保护, 避免用到3D样式时索引对不上
+        idx = NAV_ZOOM;
+    }
+
     if (flag_next) {
         return tbl_switching_mode[idx].next;
     }

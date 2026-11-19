@@ -762,9 +762,11 @@ void bsp_sys_init(void)
 
     // io init
     bsp_io_init();
+    printf("[DBG] io init done, psram_en=%d psram_size=0x%x\n", NOC_PSRAM_EN, PSRAM_SIZE);
 
     // var init
     bsp_var_init();
+    printf("[DBG] var init done\n");
 
 #if 0//(USE_APP_TYPE == APP_BLUE_FIT)
     app_platform_init();
@@ -773,20 +775,25 @@ void bsp_sys_init(void)
 #if !LP_XOSC_CLOCK_EN
     rtc_pwd_calibration();
 #endif
+    printf("[DBG] rtc pwd calib done\n");
 
     // power init
     pmu_init(BUCK_MODE_EN*xcfg_cb.buck_mode_en);
+    printf("[DBG] pmu init done\n");
 
     // clock init
     adpll_init(DAC_OUT_SPR);
     sys_clk_set(SYS_CLK_SEL);
+    printf("[DBG] clock init done\n");
 
     // peripheral init
     param_init(sys_cb.rtc_first_pwron);
+    printf("[DBG] param init done\n");
 
     //晶振配置
     xosc_init();
     plugin_init();
+    printf("[DBG] xosc/plugin init done\n");
     if (POWKEY_10S_RESET) {
         RTCCON10 = BIT(10);                     //clear 10s pending
         RTCCON12 &= ~0x03;                      //10S Reset Enable
@@ -814,13 +821,27 @@ void bsp_sys_init(void)
     bsp_huart_init();
 
     key_init();
+    printf("[DBG] before rtc_init\n");
     rtc_init();
+    printf("[DBG] after rtc_init\n");
 
     /// enable user timer for display & dac
     sys_set_tmr_enable(1, 1);
 
 #if NOC_FLASH_EN || NOC_PSRAM_EN
+    printf("[DBG] before noc_init\n");
     noc_init((NOC_PSRAM_EN << 1) | NOC_FLASH_EN);
+    printf("[DBG] after noc_init\n");
+#if NOC_PSRAM_EN
+    //调试: PSRAM读写自检(此时还没有任何模块使用PSRAM)
+    printf("[DBG] psram test start\n");
+    *(volatile u32 *)0x20000000 = 0x5A5AA5A5;
+    *(volatile u32 *)0x20000004 = 0x12345678;
+    printf("[DBG] psram rw: 0x%08x 0x%08x\n", *(volatile u32 *)0x20000000, *(volatile u32 *)0x20000004);
+    *(volatile u32 *)0x20000000 = 0;
+    *(volatile u32 *)0x20000004 = 0;
+    printf("[DBG] psram test end\n");
+#endif
 #endif
 
 #if FPGA_EN
@@ -928,7 +949,9 @@ void bsp_sys_init(void)
 #endif
     bsp_sys_mute();
 
+    printf("[DBG] before gui_init\n");
     gui_init();
+    printf("[DBG] after gui_init\n");
 
 #if WARNING_POWER_ON
     mp3_res_play(RES_BUF_EN_POWERON_MP3, RES_LEN_EN_POWERON_MP3);
@@ -936,6 +959,7 @@ void bsp_sys_init(void)
 
     //在此之后才能使用ab_malloc等函数
     customer_heap_init();
+    printf("[DBG] after customer_heap_init\n");
 
 #if AVI_DVP_USE_CAMERA
     image_sensor_drv_auto_reg();

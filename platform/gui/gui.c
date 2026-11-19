@@ -147,6 +147,20 @@ void* psram_switch_cache(void* ptr)
     return ptr;
 }
 
+#if GUI_SPU_PSRAM
+//把PSRAM整帧推屏缓冲交给libplatform的gui_flush_lcd_buff_get/put使用
+static void gui_psram_share_init(void)
+{
+    gui_share_cb.lcd_width     = GUI_SCREEN_WIDTH;
+    gui_share_cb.lcd_height    = GUI_SCREEN_HEIGHT;
+    gui_share_cb.gui_buff      = psram_gui_buff;
+    gui_share_cb.buff0_idx     = 0;
+    gui_share_cb.buff1_idx     = 0;
+    gui_share_cb.buff_idx      = 0;
+    gui_share_cb.lcd_is_rotate = false;
+}
+#endif
+
 void gui_sw_init(void)
 {
     if (!gpu_init_flag) {           //GPU没有初始化没有办法初始化GUI
@@ -162,6 +176,9 @@ void gui_sw_init(void)
     printf("%s\n", __func__);
     sys_cb.frist_gui_sw_init = true;
     os_gui_init(&tbl_gui_init_param);
+#if GUI_SPU_PSRAM
+    gui_psram_share_init();
+#endif
     compos_init();
 
     if (sys_cb.gpu_exit_ever) {     //restore ram
@@ -329,6 +346,9 @@ void gui_wakeup(void)
         ctp_init();
 #endif // CTP_SELECT
         tft_init();
+#if GUI_SPU_PSRAM
+        gui_psram_share_init();     //PSRAM掉电后重新挂推屏缓冲
+#endif
         gui_widget_refresh();
         sys_cb.gui_sleep_sta = 0;
         sys_cb.gui_need_wakeup = 1;
