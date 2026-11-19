@@ -221,6 +221,7 @@ extern lcd_drv_t lcd_oled_368_st7801n_drv;
 extern lcd_drv_t lcd_240_st7789V3_i80_drv;
 extern lcd_drv_t lcd_vga012a_drv;
 extern lcd_drv_t lcd_480_st7283_drv;
+extern lcd_drv_t lcd_480_st7701s_drv;
 extern lcd_drv_t lcd_800_st7265_drv;
 extern lcd_drv_t lcd_360_jd9855_drv;
 

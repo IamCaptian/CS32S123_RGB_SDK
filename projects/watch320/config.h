@@ -120,15 +120,38 @@
 #define PORT_TFT_INT                    IO_PA6                      //TE
 #define PORT_TFT_INT_VECTOR             PORT_INT2_VECTOR
 
+#if (GUI_SELECT == GUI_LCD_480_ST7701S)
+//RGB 16bit接口(按数据手册固定引脚), RGB模式没有TE, 且PA6被HSYNC占用
+#undef  PORT_TFT_INT
+#define PORT_TFT_INT                    IO_NONE
+
+#define PORT_LCD_DISPLAY                IO_PA7
+#define PORT_LCD_VSYNC                  IO_PA5
+#define PORT_LCD_HSYNC                  IO_PA6
+#define PORT_LCD_DE                     IO_PA3
+
+#define PORT_TFT_LCD_D0                 IO_PA2
+#define PORT_TFT_LCD_D1                 IO_PA1
+#define PORT_TFT_LCD_D2                 IO_PA0
+#define PORT_TFT_LCD_D3                 IO_PE14
+#define PORT_TFT_LCD_D4                 IO_PE13
+#define PORT_TFT_LCD_D5                 IO_PE12
+#define PORT_TFT_LCD_D6                 IO_PE11
+#define PORT_TFT_LCD_D7                 IO_PE10
+#define PORT_TFT_LCD_D8                 IO_PE9
+#define PORT_TFT_LCD_D9                 IO_PE8
+#define PORT_TFT_LCD_D10                IO_PE7
+#define PORT_TFT_LCD_D11                IO_PE6
+#define PORT_TFT_LCD_D12                IO_PE5
+#define PORT_TFT_LCD_D13                IO_PE4
+#define PORT_TFT_LCD_D14                IO_PE3
+#define PORT_TFT_LCD_D15                IO_PE2
+#else
+//QSPI/DSPI/I8080接口
 #define PORT_LCD_DISPLAY                IO_NONE
 #define PORT_LCD_VSYNC                  IO_NONE
 #define PORT_LCD_HSYNC                  IO_NONE
 #define PORT_LCD_DE                     IO_NONE
-
-#define PORT_TFT_DC                     IO_PA3
-#define PORT_TFT_CS                     IO_PA5
-#define PORT_TFT_RST                    IO_PA7
-#define PORT_TFT_LCD_SCL                IO_PA4
 
 #define PORT_TFT_LCD_D0                 IO_PA2
 #define PORT_TFT_LCD_D1                 IO_PA3
@@ -146,6 +169,18 @@
 #define PORT_TFT_LCD_D13                IO_NONE
 #define PORT_TFT_LCD_D14                IO_NONE
 #define PORT_TFT_LCD_D15                IO_NONE
+#endif
+
+#define PORT_TFT_DC                     IO_PA3
+#define PORT_TFT_CS                     IO_PA5
+#define PORT_TFT_RST                    IO_PA7
+#define PORT_TFT_LCD_SCL                IO_PA4
+
+//ST7701S RGB屏: 面板初始化用3-wire SPI引脚(IO_NONE表示未分配，按实际硬件填写)
+#define PORT_LCD_RST                    IO_NONE
+#define PORT_LCD_SPI_CS                 IO_NONE
+#define PORT_LCD_SPI_SCL                IO_NONE
+#define PORT_LCD_SPI_SDA                IO_NONE
 
 #define PORT_TFT_BL                     PG_BL_TMR4                  //BL
 #define LCD_BL_EN()                     led_pg_on()

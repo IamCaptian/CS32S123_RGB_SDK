@@ -89,6 +89,9 @@
 #elif (GUI_SELECT == GUI_LCD_480_ST7283)
     #define GUI_SCREEN_WIDTH                480
     #define GUI_SCREEN_HEIGHT               272
+#elif (GUI_SELECT == GUI_LCD_480_ST7701S)
+    #define GUI_SCREEN_WIDTH                480
+    #define GUI_SCREEN_HEIGHT               480
 #elif (GUI_SELECT == GUI_OLED_368_ST7801N)
     #define GUI_SCREEN_WIDTH                368
     #define GUI_SCREEN_HEIGHT               448
@@ -135,7 +138,7 @@
 #define TFT_LCD_SRGB_GROUP              (3<<28)
 #define TFT_LCD_PRGB_GROUP              (5<<28)
 
-#if (GUI_SELECT == GUI_LCD_800_ST7265)
+#if (GUI_SELECT == GUI_LCD_800_ST7265) || (GUI_SELECT == GUI_LCD_480_ST7701S)
 #define PORT_TFT_LCD_GROUP_NUM          TFT_LCD_PRGB_GROUP
 #elif (GUI_SELECT == GUI_LCD_480_ST7283)
 #define PORT_TFT_LCD_GROUP_NUM          TFT_LCD_SRGB_GROUP

@@ -763,6 +763,9 @@
 		<Unit filename="../../platform/gui/tft/tft_480_st7283_srgb.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="../../platform/gui/tft/tft_480_st7701s_prgb.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../../platform/gui/tft/tft_800_st7265_prgb.c">
 			<Option compilerVar="CC" />
 		</Unit>

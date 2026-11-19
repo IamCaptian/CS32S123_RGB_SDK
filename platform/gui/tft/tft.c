@@ -209,6 +209,8 @@ void tft_init(void)
     lcd_drv_register(&lcd_240_st7789V3_i80_drv);
 #elif (GUI_SELECT == GUI_LCD_480_ST7283)
     lcd_drv_register(&lcd_480_st7283_drv);
+#elif (GUI_SELECT == GUI_LCD_480_ST7701S)
+    lcd_drv_register(&lcd_480_st7701s_drv);
 #elif (GUI_SELECT == GUI_LCD_800_ST7265)
     lcd_drv_register(&lcd_800_st7265_drv);
 #elif (GUI_SELECT == GUI_TFT_360_JD9855)

@@ -46,6 +46,7 @@
 //LCD 屏幕
 #define GUI_LCD_800_ST7265              (DISPLAY_LCD | 0x01)                    //lcd 800*480
 #define GUI_LCD_480_ST7283              (DISPLAY_LCD | 0x02)                    //lcd 480*272
+#define GUI_LCD_480_ST7701S             (DISPLAY_LCD | 0x03)                    //lcd 480*480 RGB565
 
 #define CTP_NO                          0
 #define CTP_CST8X                       1
