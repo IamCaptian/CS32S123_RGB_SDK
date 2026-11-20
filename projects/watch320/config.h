@@ -115,7 +115,7 @@
 /*****************************************************************************
  * Module    : 屏幕驱动配置
  *****************************************************************************/
-#define GUI_SELECT                      GUI_TFT_360_JD9855    		//GUI Display Select
+#define GUI_SELECT                      GUI_LCD_480_ST7701S    		//GUI Display Select
 
 #define PORT_TFT_INT                    IO_PA6                      //TE
 #define PORT_TFT_INT_VECTOR             PORT_INT2_VECTOR
@@ -176,11 +176,11 @@
 #define PORT_TFT_RST                    IO_PA7
 #define PORT_TFT_LCD_SCL                IO_PA4
 
-//ST7701S RGB屏: 面板初始化用3-wire SPI引脚(IO_NONE表示未分配，按实际硬件填写)
-#define PORT_LCD_RST                    IO_NONE
-#define PORT_LCD_SPI_CS                 IO_NONE
-#define PORT_LCD_SPI_SCL                IO_NONE
-#define PORT_LCD_SPI_SDA                IO_NONE
+//ST7701S RGB屏: 面板初始化用3-wire SPI引脚(临时占用PB0/PB1/PB5/PB6, 按实际硬件修改)
+#define PORT_LCD_RST                    IO_PB5
+#define PORT_LCD_SPI_CS                 IO_PB0
+#define PORT_LCD_SPI_SCL                IO_PB1
+#define PORT_LCD_SPI_SDA                IO_PB6
 
 #define PORT_TFT_BL                     PG_BL_TMR4                  //BL
 #define LCD_BL_EN()                     led_pg_on()
@@ -216,14 +216,14 @@
 #define TFT_TE_CYCLE                    16.67                   //屏幕的刷新率TE周期时间 (ms)
 #define TFT_TE_CYCLE_DELAY              (TFT_TE_CYCLE / 3)
 #define DEFAULT_TE_MODE                 1                       //默认1 TE模式, 0为2 TE模式, 3为复杂界面专用模式
-#define GUI_LINES_CNT                   9                       //单次推屏行数
+#define GUI_LINES_CNT                   6                       //单次推屏行数(480宽时.disp区放不下9行)
 
 #define GUI_FONT_W_SPACE                0                       //字的间距
 #define GUI_FONT_H_SPACE                0                       //全局字的行间距,0:不设置, 其他:设置文本行最小间距
 #define GUI_USE_ARC                     1                       //是否使用圆弧控件
-#define GUI_USE_SCREENSHOOT             1*CHIP_PACKAGE_SUPPORT_PSRAM //是否使用截图转场, 需要使用psram
+#define GUI_USE_SCREENSHOOT             0                       //是否使用截图转场, 需要使用psram
 #define GUI_USE_SWITCH3D                0                       //是否使用3D转场动画(需要截图), 0:屏蔽3D转场(代码保留)
-#define GUI_USE_BLUR                    1*CHIP_PACKAGE_SUPPORT_PSRAM //是否使用高斯模糊, 需要使用psram,开启后下拉界面使用高斯模糊效果
+#define GUI_USE_BLUR                    0                       //是否使用高斯模糊, 需要使用psram,开启后下拉界面使用高斯模糊效果
 #define GUI_SPU_PSRAM                   0                       //使用PSRAM推屏
 #define DEFAULE_START_FUNC              FUNC_CLOCK              //默认开始任务
 
@@ -519,7 +519,7 @@
 #define USER_ADKEY                      0           //ADKEY的使用， 0为不使用
 #define USER_IOKEY                      0           //IOKEY的使用， 0为不使用
 
-#define USER_KEY_QDEC_EN                1           //旋钮, 硬件正交解码, A,B输出分别接一个IO
+#define USER_KEY_QDEC_EN                0           //旋钮, 硬件正交解码, A,B输出分别接一个IO(RGB屏占用PE13/PE14, 关闭)
 #define USER_QDEC_MAPPING               QDEC_MAP_G4 //选择硬件正交解码的mapping, 每组map的IO固定，详见define处说明
 
 #define USER_ADKEY_QDEC_EN              0           //旋钮, A,B串不同电阻接到同一个IO口上，软件ADC采集并解码

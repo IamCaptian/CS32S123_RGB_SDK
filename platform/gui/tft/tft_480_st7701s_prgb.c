@@ -74,6 +74,10 @@ static void tft_480_st7701s_init(void)
     st7701s_io_out_init(PORT_LCD_SPI_SCL);
     st7701s_io_out_init(PORT_LCD_SPI_SDA);
 
+    //面板DISP脚(手册标为Software), 用GPIO拉高
+    st7701s_io_out_init(PORT_LCD_DISPLAY);
+    st7701s_io_out(PORT_LCD_DISPLAY, 1);
+
     st7701s_io_out(PORT_LCD_SPI_CS, 1);
     st7701s_io_out(PORT_LCD_SPI_SCL, 0);
 

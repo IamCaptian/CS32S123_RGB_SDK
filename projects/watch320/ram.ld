@@ -840,37 +840,37 @@ SECTIONS
     .psram_video_play __psram_vma (NOLOAD) : {
         *(.psram_video_play.*)
         *(.psram_video_play_disp.*)
-        . = 0x1EB000;
+        . = 0x200000;       //共享区边界: 需容纳photo_view(1MB+512KB+480*480*2+8)
     } > psram
 
     .psram_photo_view __psram_vma (NOLOAD) : {
         *(.psram_photo_view.*)
         *(.psram_photo_view_disp.*)
-        . = 0x1EB000;
+        . = 0x200000;
     } > psram
 
     .psram_video_recode __psram_dvp_end (NOLOAD) : {
         *(.psram_video_recode.*)
         *(.psram_video_recode_disp.*)
-        . = 0x1EB000;
+        . = 0x200000;
     } > psram
 
     .psram_take_photo __psram_dvp_end (NOLOAD) : {
         *(.psram_take_photo.*)
         *(.psram_take_photo_disp.*)
-        . = 0x1EB000;
+        . = 0x200000;
     } > psram
 
 #endif
 
     .psram_gif __psram_vma (NOLOAD) : {
         *(.gif.*)
-        . = 0x1EB000;
+        . = 0x200000;
     } > psram
 
     .psram_other __psram_vma (NOLOAD) : {
 #if (PHOTO_VIEW_EN || VIDEO_RECODE_TAKE_PHOTO_EN || VIDEO_PLAY_EN)
-        . = 0x1EB000;
+        . = 0x200000;
 #endif
         *(.img_test.*)
         *(.psram_gui.*)
