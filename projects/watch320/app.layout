@@ -2,9 +2,9 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="..\..\platform\gui\gui.c" open="1" top="1" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="functions\func_menu_sub_honeycomb.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="587" topLine="0" />
+			<Cursor1 position="6180" topLine="125" />
 		</Cursor>
 	</File>
 	<File name="..\..\platform\bsp\bsp_video\bsp_video_play.c" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -12,14 +12,14 @@
 			<Cursor1 position="309" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="functions\func_gif.c" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="329" topLine="0" />
-		</Cursor>
-	</File>
 	<File name="functions\common\listbox.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
 			<Cursor1 position="67" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="..\..\platform\gui\gui.c" open="1" top="1" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="587" topLine="0" />
 		</Cursor>
 	</File>
 	<File name="..\..\platform\bsp\bsp_halt.c" open="0" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -27,9 +27,9 @@
 			<Cursor1 position="571" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="functions\func_menu_sub_honeycomb.c" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="functions\func_gif.c" open="0" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="6180" topLine="125" />
+			<Cursor1 position="329" topLine="0" />
 		</Cursor>
 	</File>
 	<File name="config.h" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">

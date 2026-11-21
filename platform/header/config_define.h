@@ -54,6 +54,7 @@
 #define CTP_AXS5106                     3
 #define CTP_AXS152x                     4
 #define CTP_CST9217                     5
+#define CTP_JD9261T                     6
 
 /*****************************************************************************
  * Module    : FLASH大小定义

@@ -69,6 +69,8 @@ void ctp_int_isr(void)
         AXS152x_read_readkick();
 #elif (CTP_SELECT == CTP_CST9217)
         ctp_cst9217_readkick();
+#elif (CTP_SELECT == CTP_JD9261T)
+        ctp_jd9261t_readkick();
 #endif
     }
 }
@@ -248,6 +250,8 @@ void ctp_isr(void)
        }
 #elif (CTP_SELECT == CTP_CST9217)
        press = ctp_cst9217_get_point(&ctp_cb.x, &ctp_cb.y);
+#elif (CTP_SELECT == CTP_JD9261T)
+       press = ctp_jd9261t_get_point(&ctp_cb.x, &ctp_cb.y);
 #endif
         if (press) {
             if (ctp_cb.flag_last) {
@@ -404,6 +408,8 @@ void ctp_init(void)
     res = AXS152x_init();
 #elif (CTP_SELECT == CTP_CST9217)
     res = ctp_cst9217_init();
+#elif (CTP_SELECT == CTP_JD9261T)
+    res = ctp_jd9261t_init();
 #endif
     if (!res) {
         TRACE("CTP ERROR!\n");

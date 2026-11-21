@@ -27,6 +27,10 @@ bool ctp_cst9217_init(void);
 void ctp_cst9217_readkick(void);
 bool ctp_cst9217_get_point(s32 *x, s32 *y);
 
+bool ctp_jd9261t_init(void);
+void ctp_jd9261t_readkick(void);
+bool ctp_jd9261t_get_point(s32 *x, s32 *y);
+
 bool ctp_get_kick_status(void);
 
 //tp中断在支付宝iic通信时先关中断

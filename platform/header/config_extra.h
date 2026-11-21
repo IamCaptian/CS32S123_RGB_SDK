@@ -156,6 +156,8 @@
     #define TP_IIC_ADDR                     0x2E
 #elif (CTP_SELECT == CTP_CST9217)
     #define TP_IIC_ADDR                     0x5A
+#elif (CTP_SELECT == CTP_JD9261T)
+    #define TP_IIC_ADDR                     0x68
 #endif
 
 #ifndef MODEM_CAT1_EN

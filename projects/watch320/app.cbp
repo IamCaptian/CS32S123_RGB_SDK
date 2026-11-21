@@ -728,6 +728,9 @@
 		<Unit filename="../../platform/gui/ctp/ctp_cst9217.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="../../platform/gui/ctp/ctp_jd9261t.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../../platform/gui/gui.c">
 			<Option compilerVar="CC" />
 		</Unit>
