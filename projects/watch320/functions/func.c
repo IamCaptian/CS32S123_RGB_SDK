@@ -73,6 +73,10 @@ void func_process(void)
         gui_process();                                      //刷新UI
     }
 
+#if CTP_SELECT != CTP_NO
+    ctp_debug_print();                                      //调试: 串口打印TP坐标
+#endif
+
 //#if OPUS_ENC_EN
 //    if (bsp_opus_is_encode()) {
 //        reset_sleep_delay_all();

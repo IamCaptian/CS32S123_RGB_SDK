@@ -146,7 +146,9 @@
 #define PORT_TFT_LCD_D13                IO_PE4
 #define PORT_TFT_LCD_D14                IO_PE3
 #define PORT_TFT_LCD_D15                IO_PE2
+
 #else
+
 //QSPI/DSPI/I8080接口
 #define PORT_LCD_DISPLAY                IO_NONE
 #define PORT_LCD_VSYNC                  IO_NONE

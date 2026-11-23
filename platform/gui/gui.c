@@ -264,10 +264,10 @@ void gui_init(void)
 
     LCD_POWER_EN();
     gpu_init();
+    tft_init();
 #if CTP_SELECT != CTP_NO
     ctp_init();
 #endif // CTP_SELECT
-    tft_init();
 
     sys_cb.sleep_en = 1;            //允许进休眠
     sys_cb.gui_sleep_sta = 0;
@@ -342,10 +342,10 @@ void gui_wakeup(void)
 #endif
 		bsp_pwm_wakeup();
         LCD_POWER_EN();
+        tft_init();
 #if CTP_SELECT != CTP_NO
         ctp_init();
 #endif // CTP_SELECT
-        tft_init();
 #if GUI_SPU_PSRAM
         gui_psram_share_init();     //PSRAM掉电后重新挂推屏缓冲
 #endif

@@ -25,7 +25,7 @@
 /* 电源配置 */
 #define XCFG_BUCK_MODE_EN                  1U
 #define XCFG_VDDBT_CAPLESS_EN              0U
-#define XCFG_VDDIO_SEL                     7U
+#define XCFG_VDDIO_SEL                     9U                  //VDDIO电压: 9=3.3V (2.4V+0.1V*n)
 #define XCFG_VDDBT_SEL                     10U
 
 /* DAC配置 */

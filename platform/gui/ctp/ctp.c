@@ -252,6 +252,9 @@ void ctp_isr(void)
        press = ctp_cst9217_get_point(&ctp_cb.x, &ctp_cb.y);
 #elif (CTP_SELECT == CTP_JD9261T)
        press = ctp_jd9261t_get_point(&ctp_cb.x, &ctp_cb.y);
+       if(press == 0x5A){
+            return;
+       }
 #endif
         if (press) {
             if (ctp_cb.flag_last) {
@@ -280,6 +283,38 @@ void ctp_isr(void)
 bool ctp_is_touch(void)
 {
     return (ctp_cb.sta != CTP_STA_IDLE);
+}
+
+//调试用: 打印触摸坐标(按下/移动且坐标变化时打印, 50ms限频)
+void ctp_debug_print(void)
+{
+    static u32 ticks;
+    static s32 last_x = -1;
+    static s32 last_y = -1;
+    s32 x, y;
+    u8 sta;
+
+    if (!tick_check_expire(ticks, 50)) {
+        return;
+    }
+    ticks = tick_get();
+
+    GLOBAL_INT_DISABLE();
+    sta = ctp_cb.sta;
+    x = ctp_cb.x;
+    y = ctp_cb.y;
+    GLOBAL_INT_RESTORE();
+
+    if (sta == CTP_STA_IDLE) {
+        last_x = -1;
+        last_y = -1;
+        return;
+    }
+    if ((x != last_x) || (y != last_y)) {
+        last_x = x;
+        last_y = y;
+        printf("TP: x=%d, y=%d\n", x, y);
+    }
 }
 
 //获取坐标，返回触屏点击状态
@@ -383,7 +418,7 @@ void ctp_reset(void)
     PORT_CTP_RST_L();
     delay_5ms(2);
     PORT_CTP_RST_H();
-    delay_5ms(21);
+    delay_5ms(100);             //复位释放后等待芯片启动完成(约500ms)
 }
 
 //初始化

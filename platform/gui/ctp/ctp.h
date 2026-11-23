@@ -29,7 +29,7 @@ bool ctp_cst9217_get_point(s32 *x, s32 *y);
 
 bool ctp_jd9261t_init(void);
 void ctp_jd9261t_readkick(void);
-bool ctp_jd9261t_get_point(s32 *x, s32 *y);
+u8 ctp_jd9261t_get_point(s32 *x, s32 *y);
 
 bool ctp_get_kick_status(void);
 
@@ -40,4 +40,5 @@ void sys_ctp_irq_disable(int vector);
 i2c_t *ctp_iic_reg_get(void);
 
 bool ctp_is_touch(void);
+void ctp_debug_print(void);
 #endif

@@ -1,5 +1,7 @@
 #include "include.h"
 
+u32 getcfg_vddio_sel(void);         //config.c
+
 #define TRACE_EN                0
 
 #if TRACE_EN
@@ -779,7 +781,10 @@ void bsp_sys_init(void)
 
     // power init
     pmu_init(BUCK_MODE_EN*xcfg_cb.buck_mode_en);
-    printf("[DBG] pmu init done\n");
+
+    //VDDIO电压: bit[8:5], 2.4V + 0.1V*n (n=9 -> 3.3V), 按配置强制设置一次
+    PWRCON0 = (PWRCON0 & ~(0xF << 5)) | ((getcfg_vddio_sel() & 0xF) << 5);
+    printf("[DBG] pmu init done, vddio_sel=%d, PWRCON0=%08X\n", getcfg_vddio_sel(), (unsigned int)PWRCON0);
 
     // clock init
     adpll_init(DAC_OUT_SPR);
