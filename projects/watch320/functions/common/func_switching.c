@@ -55,7 +55,7 @@ static const func_switching_mode_t tbl_switching_mode[] = {
 #if GUI_USE_SWITCH3D && GUI_USE_SCREENSHOOT
     {FUNC_SWITCH3D_LR_RIGHT,     		FUNC_SWITCH3D_LR_LEFT    		},           //ZOOM
 #else
-    {FUNC_SWITCH_LR_ZOOM_RIGHT,     		FUNC_SWITCH_LR_ZOOM_LEFT    		},           //ZOOM
+    {FUNC_SWITCH_LR_RIGHT,     			FUNC_SWITCH_LR_LEFT    			},           //ZOOM(去掉缩放, 改为平移切换)
 #endif // GUI_USE_SWITCH3D
 
     {FUNC_SWITCH_FADE_OUT,              FUNC_SWITCH_FADE_OUT            },           //FADE

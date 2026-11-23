@@ -405,7 +405,7 @@ void func_switch_to(u8 sta, u16 switch_mode)
 //切换回主时钟
 void func_switch_to_clock(void)
 {
-    func_switch_to(FUNC_CLOCK, FUNC_SWITCH_LR_ZOOM_RIGHT | FUNC_SWITCH_AUTO);
+    func_switch_to(FUNC_CLOCK, FUNC_SWITCH_LR_RIGHT | FUNC_SWITCH_AUTO);
     func_cb.flag_sort = false;
 }
 
@@ -565,7 +565,7 @@ void func_backing_to(void)
         func_switching_to_menu();                               //右滑缓慢退出任务
     } else if (stack_top == FUNC_SMARTSTACK
     ) {
-        func_switch_to(stack_top, FUNC_SWITCH_LR_ZOOM_RIGHT);   //返回上一个界面
+        func_switch_to(stack_top, FUNC_SWITCH_LR_RIGHT);   //返回上一个界面
     } else {
         func_switch_to(stack_top, func_get_switching_mode_byidx(sys_cb.nav_index, false));   //返回上一个界面
     }
@@ -599,7 +599,7 @@ void func_back_to(void)
         func_switch_to_menu();                                  //返回主菜单
     } else if (stack_top == FUNC_SMARTSTACK
     ) {
-        func_switch_to(stack_top, FUNC_SWITCH_LR_ZOOM_RIGHT | FUNC_SWITCH_AUTO);  //返回上一个界面
+        func_switch_to(stack_top, FUNC_SWITCH_LR_RIGHT | FUNC_SWITCH_AUTO);  //返回上一个界面
     }  else {
         func_switch_to(stack_top, func_get_switching_mode_byidx(sys_cb.nav_index, false) | FUNC_SWITCH_AUTO);    //返回上一个界面
     }
