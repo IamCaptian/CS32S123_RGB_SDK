@@ -35,6 +35,10 @@
 #define JD9261T_POINT_START     3                   //点数据起始偏移
 #define JD9261T_MAX_TOUCH_NUM   2                   //支持2点触摸
 
+//异常坐标过滤
+#define JD9261T_COORD_MAX       (GUI_SCREEN_WIDTH + 20)  //坐标合法性上限(TP边缘可能略大于屏幕)
+#define JD9261T_JUMP_TH         (GUI_SCREEN_WIDTH / 4)   //单帧跳变阈值, 超过视为脏帧
+
 #define JD9261T_READ_WAIT       0x5A                //多步流程的中间态返回值(仅kick,不解析)
 
 // 坐标方向调整(按实际屏幕方向修改)
@@ -53,6 +57,11 @@ static u8 jd9261t_buf[JD9261T_READ_LEN];
 static u8 jd9261t_cmd[6];
 static u8 jd9261t_stage;
 static u32 jd9261t_stage_tick;
+
+//滤波基准: 上一次有效坐标
+static s32 jd9261t_last_x;
+static s32 jd9261t_last_y;
+static bool jd9261t_have_last;
 
 extern i2c_t *CTP_IIC;
 extern bool ctp_kick_status;
@@ -166,6 +175,8 @@ bool ctp_jd9261t_init(void)
     bool found = false;
     int i;
 
+    jd9261t_have_last = false;                  //重新初始化/唤醒后清滤波基准
+
     //复位后芯片需要稳定时间, 读ID重试(每次之间留出间隔, 避免都在未就绪窗口里连打)
     for (i = 0; i < JD9261T_ID_RETRY_CNT; i++) {
         memset(id, 0, sizeof(id));
@@ -240,17 +251,13 @@ u8 ctp_jd9261t_get_point(s32 *x, s32 *y)
         finger_num = JD9261T_MAX_TOUCH_NUM;
     }
     if (finger_num == 0) {
+        jd9261t_have_last = false;                  //抬起, 清滤波基准
         return false;
     }
 
     p = &jd9261t_buf[JD9261T_POINT_START];
     px = ((s32)p[0] << 8) | p[1];
     py = ((s32)p[2] << 8) | p[3];
-
-    //无效坐标
-    if (((px == 0) && (py == 0)) || ((px == 0xFFFF) && (py == 0xFFFF))) {
-        return false;
-    }
 
 #if JD9261T_XY_SWAP
     {
@@ -265,6 +272,23 @@ u8 ctp_jd9261t_get_point(s32 *x, s32 *y)
 #if JD9261T_Y_REVERSE
     py = (GUI_SCREEN_HEIGHT - 1) - py;
 #endif
+
+    //异常坐标过滤: 无效值/超范围/单帧跳变过大 -> 丢弃本帧, 沿用上一有效坐标
+    if (((px == 0) && (py == 0)) ||
+        (px >= JD9261T_COORD_MAX) || (py >= JD9261T_COORD_MAX) ||
+        (jd9261t_have_last && ((abs_s(px - jd9261t_last_x) > JD9261T_JUMP_TH) ||
+                               (abs_s(py - jd9261t_last_y) > JD9261T_JUMP_TH)))) {
+        if (jd9261t_have_last) {
+            *x = jd9261t_last_x;                    //保持按下, 位置不更新
+            *y = jd9261t_last_y;
+            return true;
+        }
+        return false;
+    }
+
+    jd9261t_last_x = px;
+    jd9261t_last_y = py;
+    jd9261t_have_last = true;
 
     *x = px;
     *y = py;
