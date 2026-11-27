@@ -69,13 +69,15 @@ void func_process(void)
 	#else
 	if (!sys_cb.gui_sleep_sta && !sys_cb.flag_halt) {
 	#endif
+#if TFT_RGB_DOUBLE_BUFFER_TEST
+        tft_rgb_submit_before_gui();
+#endif
         compo_update();                                     //更新组件
         gui_process();                                      //刷新UI
-    }
-
-#if CTP_SELECT != CTP_NO
-    ctp_debug_print();                                      //调试: 串口打印TP坐标
+#if TFT_RGB_DOUBLE_BUFFER_TEST
+        tft_rgb_double_buffer_poll();
 #endif
+    }
 
 //#if OPUS_ENC_EN
 //    if (bsp_opus_is_encode()) {

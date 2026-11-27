@@ -320,4 +320,12 @@ void tft_bglight_frist_set_check(void);
 
 void tft_te_isr(void);
 
+#ifndef TFT_RGB_DOUBLE_BUFFER_TEST
+#define TFT_RGB_DOUBLE_BUFFER_TEST ((GUI_SELECT == GUI_LCD_480_ST7701S) && !GUI_SPU_PSRAM)
+#endif
+#if TFT_RGB_DOUBLE_BUFFER_TEST
+void tft_rgb_submit_before_gui(void);
+void tft_rgb_double_buffer_poll(void);
+#endif
+
 #endif

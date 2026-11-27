@@ -484,6 +484,11 @@ void compo_set_update(tm_t tm, u16 mtime)
         switch (compo->type) {
         case COMPO_TYPE_DATETIME:
             {
+#if TFT_RGB_DOUBLE_BUFFER_TEST
+                if (func_cb.sta == FUNC_CLOCK && sys_cb.flag_swithing) {
+                    break;
+                }
+#endif
                 s16 angle = 0;
                 switch (compo->bond_data) {
                 case COMPO_BOND_HOUR:

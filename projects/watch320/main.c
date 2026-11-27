@@ -106,6 +106,12 @@ int main(void)
 #endif //ASR_STACK_EN
 
     bsp_sys_init();
+#if (GUI_SELECT == GUI_LCD_480_ST7701S) && BUCK_MODE_EN && XCFG_BUCK_MODE_EN
+    // Allow RGB to stabilize before enabling BUCK.
+    WDT_CLR();
+    delay_ms(800);
+    set_buck_mode(1);
+#endif
 #if	DONGLE_AUTH_EN
     if (check_uid_entryption() == false) {
         printf("Dongle authorization verification failed!\n");

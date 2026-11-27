@@ -37,7 +37,7 @@
  * Module    : 系统功能选择配置
  *****************************************************************************/
 #define FPGA_EN                         0                           //FPGA调试(关闭部分与硬件相关的模拟配置)
-#define BUCK_MODE_EN                    1                           //是否BUCK MODE
+#define BUCK_MODE_EN                    1                           //是否BUCK MODE(0:LDO模式, 原厂建议先关BUCK排查VDDIO纹波)
 #define SYS_CLK_SEL                     SYS_48M                    //选择系统时钟
 #define POWKEY_10S_RESET                xcfg_cb.powkey_10s_reset
 #define SOFT_POWER_ON_OFF               1                           //是否使用软开关机功能

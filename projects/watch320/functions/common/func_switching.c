@@ -186,6 +186,8 @@ static bool func_switching_lr(u16 switch_mode, bool flag_auto)
     u8 flag_pos;                            //当前坐标状态
     bool flag_change;
     s32 dx = 0;
+    s32 applied_dx = 0;
+    bool position_applied = false;
     int dx_auto;
     u32 tick = tick_get();
     s32 xpos1 = GUI_SCREEN_CENTER_X;
@@ -296,25 +298,29 @@ static bool func_switching_lr(u16 switch_mode, bool flag_auto)
                 halt(HALT_FUNC_SWITCH_LR_MODE);
                 return false;
             }
-            xpos1 = GUI_SCREEN_CENTER_X + dx;
-            xpos2 = xpos2_start + dx;
-            compo_form_set_pos(frm_last, xpos1, GUI_SCREEN_CENTER_Y);
-            compo_form_set_pos(frm_cur, xpos2, GUI_SCREEN_CENTER_Y);
-            if (switch_mode == FUNC_SWITCH_LR_ZOOM_LEFT || switch_mode == FUNC_SWITCH_LR_ZOOM_RIGHT) {
-                s32 abs_dx = abs_s(dx);
-                s32 dw = (GUI_SCREEN_WIDTH - SWITCHING_LR_WIDTH) * abs_dx / x_distance;
-                s32 xw1 = GUI_SCREEN_WIDTH - dw;
-                s32 xw2 = SWITCHING_LR_WIDTH + dw;
-                s32 dh = (GUI_SCREEN_HEIGHT - SWITCHING_LR_HEIGHT) * abs_dx / x_distance;
-                s32 xh1 = GUI_SCREEN_HEIGHT - dh;
-                s32 xh2 = SWITCHING_LR_HEIGHT + dh;
-                u8 da = (255 - SWITCHING_LR_ALPHA) * abs_dx / x_distance;
-                u8 xa1 = 255 - da;
-                u8 xa2 = SWITCHING_LR_ALPHA + da;
-                compo_form_scale_to(frm_last, xw1, xh1);
-                compo_form_scale_to(frm_cur, xw2, xh2);
-                compo_form_set_alpha(frm_last, xa1);
-                compo_form_set_alpha(frm_cur, xa2);
+            if (!position_applied || dx != applied_dx) {
+                position_applied = true;
+                applied_dx = dx;
+                xpos1 = GUI_SCREEN_CENTER_X + dx;
+                xpos2 = xpos2_start + dx;
+                compo_form_set_pos(frm_last, xpos1, GUI_SCREEN_CENTER_Y);
+                compo_form_set_pos(frm_cur, xpos2, GUI_SCREEN_CENTER_Y);
+                if (switch_mode == FUNC_SWITCH_LR_ZOOM_LEFT || switch_mode == FUNC_SWITCH_LR_ZOOM_RIGHT) {
+                    s32 abs_dx = abs_s(dx);
+                    s32 dw = (GUI_SCREEN_WIDTH - SWITCHING_LR_WIDTH) * abs_dx / x_distance;
+                    s32 xw1 = GUI_SCREEN_WIDTH - dw;
+                    s32 xw2 = SWITCHING_LR_WIDTH + dw;
+                    s32 dh = (GUI_SCREEN_HEIGHT - SWITCHING_LR_HEIGHT) * abs_dx / x_distance;
+                    s32 xh1 = GUI_SCREEN_HEIGHT - dh;
+                    s32 xh2 = SWITCHING_LR_HEIGHT + dh;
+                    u8 da = (255 - SWITCHING_LR_ALPHA) * abs_dx / x_distance;
+                    u8 xa1 = 255 - da;
+                    u8 xa2 = SWITCHING_LR_ALPHA + da;
+                    compo_form_scale_to(frm_last, xw1, xh1);
+                    compo_form_scale_to(frm_cur, xw2, xh2);
+                    compo_form_set_alpha(frm_last, xa1);
+                    compo_form_set_alpha(frm_cur, xa2);
+                }
             }
         }
         func_process();

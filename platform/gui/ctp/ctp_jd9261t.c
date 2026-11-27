@@ -37,7 +37,6 @@
 
 //异常坐标过滤
 #define JD9261T_COORD_MAX       (GUI_SCREEN_WIDTH + 20)  //坐标合法性上限(TP边缘可能略大于屏幕)
-#define JD9261T_JUMP_TH         (GUI_SCREEN_WIDTH / 4)   //单帧跳变阈值, 超过视为脏帧
 
 #define JD9261T_READ_WAIT       0x5A                //多步流程的中间态返回值(仅kick,不解析)
 
@@ -273,11 +272,9 @@ u8 ctp_jd9261t_get_point(s32 *x, s32 *y)
     py = (GUI_SCREEN_HEIGHT - 1) - py;
 #endif
 
-    //异常坐标过滤: 无效值/超范围/单帧跳变过大 -> 丢弃本帧, 沿用上一有效坐标
+    // 无效或越界坐标沿用上一有效点。
     if (((px == 0) && (py == 0)) ||
-        (px >= JD9261T_COORD_MAX) || (py >= JD9261T_COORD_MAX) ||
-        (jd9261t_have_last && ((abs_s(px - jd9261t_last_x) > JD9261T_JUMP_TH) ||
-                               (abs_s(py - jd9261t_last_y) > JD9261T_JUMP_TH)))) {
+        (px >= JD9261T_COORD_MAX) || (py >= JD9261T_COORD_MAX)) {
         if (jd9261t_have_last) {
             *x = jd9261t_last_x;                    //保持按下, 位置不更新
             *y = jd9261t_last_y;

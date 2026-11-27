@@ -11,6 +11,260 @@
 
 static tft_cb_t tft_cb;
 
+#if TFT_RGB_DOUBLE_BUFFER_TEST
+static u16 rgb_db_frame[2][GUI_SCREEN_WIDTH * GUI_SCREEN_HEIGHT]
+    AT(.psram_buf.rgb_back) ALIGNED(64);
+
+typedef enum {
+    RGB_DB_OFF,
+    RGB_DB_IDLE,
+    RGB_DB_REQUEST,
+    RGB_DB_DRAWING,
+    RGB_DB_DRAWN,
+} rgb_db_state_t;
+
+extern void gpu_share_tft_init(bool rgbw_support, bool ramless_support,
+                               void *ramless_buf, u16 ramless_line_wid);
+
+static volatile rgb_db_state_t rgb_db_state;
+static u32 rgb_db_frames[3];
+static u32 rgb_db_front;
+static volatile u32 rgb_db_scanning_next;
+static volatile u32 rgb_db_ready;
+static u32 rgb_db_render;
+
+// PA14 receives the LCD VSYNC from PA5. TMR1 uses XOSC / 2.
+#define RGB_VSYNC_DELAY_US 16500U
+#define RGB_VSYNC_POLL_US 40U
+#define RGB_VSYNC_POLL_COUNT 88U
+#define RGB_VSYNC_CAPTURE_US 150U
+#define RGB_VSYNC_TMR_MODE (BIT(7) | BIT(4) | BIT(2))
+#define RGB_VSYNC_TMR_TICKS_PER_US (XOSC_CLK_HZ / 2000000U)
+
+static bool rgb_vsync_enabled;
+static u16 rgb_vsync_polls_left;
+
+AT(.com_text.tft_spi)
+static void tft_rgb_commit_frame(u32 pending)
+{
+    u32 address = rgb_db_ready;
+    if (pending != BIT(31) || !address || rgb_db_scanning_next ||
+        rgb_db_state == RGB_DB_OFF || !(LCDCON & BIT(16))) {
+        return;
+    }
+
+    LCDADR = address;
+    rgb_db_scanning_next = address;
+    rgb_db_ready = 0;
+}
+
+AT(.com_text.tft_spi) __attribute__((noinline))
+static void tft_rgb_commit_from_thread(void)
+{
+    GLOBAL_INT_DISABLE();
+    tft_rgb_commit_frame(LCDPEND);
+    GLOBAL_INT_RESTORE();
+}
+
+AT(.com_text.tft_spi) __attribute__((noinline))
+static void tft_rgb_publish_drawn(void)
+{
+    GLOBAL_INT_DISABLE();
+    rgb_db_ready = rgb_db_render;
+    GLOBAL_INT_RESTORE();
+}
+
+AT(.com_text.tft_spi)
+static u32 tft_rgb_capture_rollover(void)
+{
+    TMR1CON = 0;
+    TMR1CNT = 0;
+    TMR1PR = 0xffffU;
+    TMR1CON = (RGB_VSYNC_TMR_MODE & ~BIT(7)) | BIT(0);
+
+    u32 pending = 0;
+    for (unsigned int sample = 0; sample < 12000U; sample++) {
+        pending = LCDPEND;
+        if (pending == BIT(31) ||
+            TMR1CNT >= RGB_VSYNC_TMR_TICKS_PER_US * RGB_VSYNC_CAPTURE_US) {
+            break;
+        }
+    }
+    return pending;
+}
+
+AT(.com_text.tft_spi)
+static void tft_rgb_timer_isr(void)
+{
+    if (!(TMR1CON & BIT(9))) {
+        return;
+    }
+    TMR1CPND = BIT(9);
+    u32 pending = LCDPEND;
+    u32 line = (pending >> 16) & 0x1ffU;
+    bool near_rollover = pending == BIT(30) ||
+                         (!(pending & (BIT(30) | BIT(31))) &&
+                          line >= GUI_SCREEN_HEIGHT - 3U && line < GUI_SCREEN_HEIGHT);
+    if (near_rollover || pending == BIT(31)) {
+        if (near_rollover) {
+            pending = tft_rgb_capture_rollover();
+        }
+        tft_rgb_commit_frame(pending);
+        TMR1CON = 0;
+    } else if (--rgb_vsync_polls_left == 0) {
+        TMR1CON = 0;
+    } else if (rgb_vsync_polls_left == RGB_VSYNC_POLL_COUNT - 1U) {
+        TMR1CON = 0;
+        TMR1CNT = 0;
+        TMR1PR = RGB_VSYNC_TMR_TICKS_PER_US * RGB_VSYNC_POLL_US - 1U;
+        TMR1CON = RGB_VSYNC_TMR_MODE | BIT(0);
+    }
+}
+
+AT(.com_text.tft_spi)
+static void tft_rgb_vsync_isr(void)
+{
+    const u32 irq_pending = BIT(16 + PORT_INT1_VECTOR);
+    if (!(WKUPEDG & irq_pending)) {
+        return;
+    }
+    WKUPCPND = irq_pending;
+    TMR1CON = 0;
+    TMR1CPND = BIT(9);
+    TMR1CNT = 0;
+    TMR1PR = RGB_VSYNC_TMR_TICKS_PER_US * RGB_VSYNC_DELAY_US - 1U;
+    rgb_vsync_polls_left = RGB_VSYNC_POLL_COUNT;
+    TMR1CON = RGB_VSYNC_TMR_MODE | BIT(0);
+}
+
+static void tft_rgb_vsync_start(void)
+{
+    if (TMR1CON & BIT(0)) {
+        return;
+    }
+    CLKGAT0 |= BIT(1);
+    sys_irq_init(IRQ_TMR1_VECTOR, 0, tft_rgb_timer_isr);
+    port_gpio_set_in(IO_PA14, GPIOxPU200K);
+    WKUPCPND = BIT(16 + PORT_INT1_VECTOR);
+    port_irq_register(PORT_INT1_VECTOR, tft_rgb_vsync_isr);
+    rgb_vsync_enabled = port_wakeup_init(IO_PA14, 1, 1);
+    if (!rgb_vsync_enabled) {
+        port_irq_free(PORT_INT1_VECTOR);
+        PICEN &= ~BIT(IRQ_TMR1_VECTOR);
+    }
+}
+
+static void tft_rgb_vsync_stop(void)
+{
+    if (rgb_vsync_enabled) {
+        port_irq_free(PORT_INT1_VECTOR);
+        port_wakeup_exit(IO_PA14);
+        PICEN &= ~BIT(IRQ_TMR1_VECTOR);
+        TMR1CON = 0;
+        TMR1CPND = BIT(9);
+        rgb_vsync_enabled = false;
+    }
+}
+
+static bool tft_rgb_in_flip_window(bool allow_short_wait)
+{
+    const u32 rollover_pending = BIT(31);
+    u32 pending = LCDPEND;
+    u32 phase = (pending >> 16) & 0x1ffU;
+    bool near_last_line = !(pending & (BIT(30) | BIT(31))) &&
+                          phase >= GUI_SCREEN_HEIGHT - 32U && phase < GUI_SCREEN_HEIGHT;
+    if (allow_short_wait && (near_last_line || pending == BIT(30))) {
+        // Keep looking through bit 30 alone. Only the validated rollover permits a write.
+        u32 start = tick_get();
+        do {
+            pending = LCDPEND;
+            if (pending == rollover_pending) {
+                return true;
+            }
+        } while (tick_get() - start < 2U);
+    }
+    return pending == rollover_pending;
+}
+
+static void tft_rgb_double_buffer_start(void)
+{
+    rgb_db_frames[0] = DMA_ADR(lcd_480_st7701s_drv.param.rgb_drv_param.refersh_dma_buf) | BIT(28);
+    rgb_db_frames[1] = DMA_ADR(rgb_db_frame[0]) | BIT(28);
+    rgb_db_frames[2] = DMA_ADR(rgb_db_frame[1]) | BIT(28);
+    rgb_db_front = rgb_db_frames[0];
+    rgb_db_scanning_next = 0;
+    rgb_db_ready = 0;
+    rgb_db_state = RGB_DB_IDLE;
+}
+
+static void tft_rgb_start_next_draw(void)
+{
+#if GUI_USE_SCREENSHOOT
+    if (gui_get_screenshot()) {
+        return;
+    }
+#endif
+    // The ISR moves ready to scanning_next, so read the two in this order.
+    u32 ready = rgb_db_ready;
+    u32 scanning_next = rgb_db_scanning_next;
+    for (unsigned int i = 0; i < sizeof(rgb_db_frames) / sizeof(rgb_db_frames[0]); i++) {
+        u32 address = rgb_db_frames[i];
+        if (address == rgb_db_front || address == scanning_next || address == ready) {
+            continue;
+        }
+
+        rgb_db_render = address;
+        gpu_share_tft_init(false, true, (void *)address, GUI_SCREEN_WIDTH);
+        gui_refresh();
+        rgb_db_state = RGB_DB_REQUEST;
+        os_gui_draw_force();
+        break;
+    }
+}
+
+static void tft_rgb_try_submit(bool allow_short_wait)
+{
+    if (!rgb_db_ready || rgb_db_scanning_next ||
+        !tft_rgb_in_flip_window(allow_short_wait)) {
+        return;
+    }
+
+    tft_rgb_commit_from_thread();
+}
+
+void tft_rgb_submit_before_gui(void)
+{
+    if (rgb_db_state != RGB_DB_OFF && (LCDCON & BIT(16))) {
+        tft_rgb_try_submit(false);
+    }
+}
+
+void tft_rgb_double_buffer_poll(void)
+{
+    if (rgb_db_state == RGB_DB_OFF || !(LCDCON & BIT(16))) {
+        return;
+    }
+
+    u32 scanning_next = rgb_db_scanning_next;
+    if (scanning_next && LCDADR == scanning_next) {
+        rgb_db_front = scanning_next;
+        rgb_db_scanning_next = 0;
+    }
+
+    if (rgb_db_state == RGB_DB_DRAWN) {
+        // Keep the most recent complete frame while the LCD waits for a flip.
+        tft_rgb_publish_drawn();
+        rgb_db_state = RGB_DB_IDLE;
+    }
+
+    tft_rgb_try_submit(true);
+
+    if (rgb_db_state == RGB_DB_IDLE && (rgb_db_scanning_next || LCDADR == rgb_db_front)) {
+        tft_rgb_start_next_draw();
+    }
+}
+#endif
+
 tft_cb_t* tft_get_tft_cb(void)
 {
     return &tft_cb;
@@ -23,12 +277,14 @@ static void tft_te_refresh(void)
     compo_cb.rtc_cnt = RTCCNT;
     compo_cb.rtc_cnt2 = RTCCON2;
     compo_cb.rtc_update = true;
+#if !TFT_RGB_DOUBLE_BUFFER_TEST
 #if GUI_USE_SCREENSHOOT
     if (!gui_get_screenshot())
 #endif
-	{
+    {
         os_gui_draw();
     }
+#endif
 }
 
 AT(.com_text.tft_spi)
@@ -123,6 +379,11 @@ void tft_frame_start(void)
     }
 
     tft_cb.flag_in_frame = true;
+#if TFT_RGB_DOUBLE_BUFFER_TEST
+    if (rgb_db_state == RGB_DB_REQUEST) {
+        rgb_db_state = RGB_DB_DRAWING;
+    }
+#endif
     tft_write_data_start();
 }
 
@@ -143,6 +404,11 @@ void tft_frame_end(void)
         tft_cb.tft_set_baud_kick = false;
         LCDSPIBAUD = tft_cb.despi_baud;
     }
+#if TFT_RGB_DOUBLE_BUFFER_TEST
+    if (rgb_db_state == RGB_DB_DRAWING) {
+        rgb_db_state = RGB_DB_DRAWN;
+    }
+#endif
 }
 
 //背光亮度初始设置检测
@@ -225,10 +491,20 @@ void tft_init(void)
     lcd_drv_init();
     lcd_drv_set_window(0, 0, GUI_SCREEN_WIDTH - 1, GUI_SCREEN_HEIGHT - 1);
     tft_cb.tft_bglight_kick = true; //延时打开背光
+#if TFT_RGB_DOUBLE_BUFFER_TEST
+    tft_rgb_double_buffer_start();
+    tft_rgb_vsync_start();
+#endif
 }
 
 void tft_exit(void)
 {
+#if TFT_RGB_DOUBLE_BUFFER_TEST
+    tft_rgb_vsync_stop();
+    TICK1CON = 0;
+    rgb_db_state = RGB_DB_OFF;
+    os_gui_draw_w4_done();
+#endif
     if(!vddio_sleep_level) {
 //        bsp_pwm_disable(PORT_TFT_BL); //关背光
         lcd_drv_set_brightness(0);

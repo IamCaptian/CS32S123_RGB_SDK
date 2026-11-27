@@ -780,10 +780,12 @@ void bsp_sys_init(void)
     printf("[DBG] rtc pwd calib done\n");
 
     // power init
+#if (GUI_SELECT == GUI_LCD_480_ST7701S) && BUCK_MODE_EN && XCFG_BUCK_MODE_EN
+    pmu_init(0);  // RGB project enables BUCK after display initialization in main().
+#else
     pmu_init(BUCK_MODE_EN*xcfg_cb.buck_mode_en);
+#endif
 
-    //VDDIO电压: bit[8:5], 2.4V + 0.1V*n (n=9 -> 3.3V), 按配置强制设置一次
-    PWRCON0 = (PWRCON0 & ~(0xF << 5)) | ((getcfg_vddio_sel() & 0xF) << 5);
     printf("[DBG] pmu init done, vddio_sel=%d, PWRCON0=%08X\n", getcfg_vddio_sel(), (unsigned int)PWRCON0);
 
     // clock init
