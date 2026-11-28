@@ -29,6 +29,7 @@
 #include "res.h"
 #include "ui.h"
 #include "ui_external.h"
+#include "ui_compat.h"
 
 //#ifndef sscanf
 //extern int sscanf(char *s, const char *format, ...);
